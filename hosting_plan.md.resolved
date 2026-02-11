@@ -1,0 +1,78 @@
+# Website Hosting Plan (India)
+
+This document outlines the comprehensive strategy for hosting and maintaining a modern web application (like the Vetri DJ Booking System) in India.
+
+## 1. Hosting Details
+
+### Hosting Types
+*   **Shared Hosting**: Multiple sites share one server. Cheapest but lowest performance. Best for small static sites.
+*   **VPS (Virtual Private Server)**: A dedicated portion of a server. Offers better control and performance. Good for growing apps.
+*   **Dedicated Hosting**: Entire physical server for one client. Highest performance and security, but expensive.
+*   **Cloud Hosting (PaaS/IaaS)**: Scale resources dynamically. Examples: **AWS**, **Vercel**, **DigitalOcean**. Preferred for Next.js apps.
+
+### Top Providers in India
+| Provider | Target Segment | Pricing (Approx.) | Special Offers |
+| :--- | :--- | :--- | :--- |
+| **Hostinger India** | Beginners / SMBs | ₹149/mo - ₹699/mo | Free domain for 1 year, 99.9% uptime. |
+| **Bluehost India** | WordPress / Blogs | ₹169/mo - ₹499/mo | Free SSL, 24/7 localized support. |
+| **AWS (Mumbai Region)** | Enterprise / Scalable Apps | Pay-as-you-go (Tiered) | "Free Tier" for 12 months (EC2, S3, etc.). |
+
+---
+
+## 2. Steps for Hosting a Website
+
+### Step 1: Domain Registration
+1.  Search for availability on **BigRock.in** or **GoDaddy India**.
+2.  Purchase a `.in` or `.com` domain.
+3.  Set up Auto-renewal to prevent downtime.
+
+### Step 2: Server Setup & Configuration
+1.  **Select Region**: Choose **Mumbai** or **Hyderabad** data centers to minimize latency for Indian users.
+2.  **SSL Certificate**: Install Let's Encrypt (usually free) for HTTPS.
+3.  **DNS Management**: Point `A` or `CNAME` records to your server IP.
+
+### Step 3: Performance Optimization
+-   **CDN (Content Delivery Network)**: Use **Cloudflare** with Indian edge nodes (Chennai, Mumbai, Delhi) for fast asset loading.
+-   **Caching**: Implement Redis or server-side caching for database queries.
+
+---
+
+## 3. Technical Stack (Recommended)
+
+| Layer | Technology | Rationale |
+| :--- | :--- | :--- |
+| **Frontend** | React / Next.js | Best-in-class SEO and speed via Server-Side Rendering (SSR). |
+| **Styling** | Tailwind CSS | Rapid UI development with responsive utility classes. |
+| **Backend** | Node.js (App Dir) | Unified React/Server logic in Next.js. |
+| **Database** | MongoDB Atlas | Scalable document storage (NoSQL) for flexible event data. |
+| **Auth** | NextAuth.js | Secure OAuth & credential-based authentication. |
+
+---
+
+## 4. Interactive Features
+
+1.  **User Profiles & Dashboards**:
+    -   Clients can view booking history, download invoices, and track event status.
+    -   Crew can manage assignments and check-in times.
+2.  **Real-Time WhatsApp Integration**:
+    -   Automated booking confirmations and reminders sent via WhatsApp Business API.
+3.  **Dynamic Availability Calendar**:
+    -   Interactive date picker that shows "Sold Out" or "Available" dates in real-time.
+
+---
+
+## 5. Full Project Process
+
+### Timeline (8-12 Weeks)
+1.  **Planning (Week 1-2)**: Requirement gathering, sitemaps, and database schema design.
+2.  **Design (Week 3-4)**: High-fidelity UI/UX mockups and prototyping.
+3.  **Development (Week 5-9)**:
+    -   *Sprint 1*: Backend API & DB setup.
+    -   *Sprint 2*: Frontend UI components.
+    -   *Sprint 3*: Integration & Logic.
+4.  **Testing (Week 10)**: Unit testing, UAT, and cross-browser compatibility.
+5.  **Deployment (Week 11)**: Production build, DNS cutover, and monitoring setup.
+6.  **Maintenance (Ongoing)**: Monthly backups, security patches, and performance tuning.
+
+### Scalability Consideration
+Use **Horizontal Scaling** (adding more server instances) and **Database Indexing** to handle high-traffic wedding seasons in India.
