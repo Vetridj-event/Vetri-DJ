@@ -10,10 +10,14 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Music, CheckCircle2, Sparkles } from 'lucide-react'
+import { Music, CheckCircle2, Sparkles, Calendar as CalendarIcon } from 'lucide-react'
 import { storage } from "@/lib/storage"
 import { EventPackage, Booking } from "@/types"
 import { useEffect } from "react"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
 
 interface BookingModalProps {
   open: boolean
@@ -44,10 +48,12 @@ export function BookingModal({ open, onOpenChange }: BookingModalProps) {
   ]
 
   const [djPackages, setDjPackages] = useState<EventPackage[]>([])
+  const [existingBookings, setExistingBookings] = useState<Booking[]>([])
 
   useEffect(() => {
     if (open) {
       storage.getPackages().then(setDjPackages)
+      storage.getBookings().then(setExistingBookings)
     }
   }, [open])
 
@@ -259,15 +265,47 @@ ${formData.additionalNotes || 'None'}`
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 flex flex-col">
                 <Label htmlFor="eventDate">Event Date *</Label>
-                <Input
-                  id="eventDate"
-                  type="date"
-                  value={formData.eventDate}
-                  onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
-                  required
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !formData.eventDate && "text-muted-foreground"
+                      )}
+                    >
+                      {formData.eventDate ? (
+                        format(new Date(formData.eventDate), "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.eventDate ? new Date(formData.eventDate) : undefined}
+                      onSelect={(date) => date && setFormData({ ...formData, eventDate: date.toISOString().split('T')[0] })}
+                      disabled={(date) => {
+                        // Disable past dates
+                        if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true
+
+                        // Disable booked dates
+                        return existingBookings.some(b => {
+                          const bookedDate = new Date(b.date)
+                          return date.getDate() === bookedDate.getDate() &&
+                            date.getMonth() === bookedDate.getMonth() &&
+                            date.getFullYear() === bookedDate.getFullYear() &&
+                            b.status !== 'CANCELLED'
+                        })
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
