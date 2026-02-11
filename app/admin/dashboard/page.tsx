@@ -1,12 +1,14 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { storage } from '@/lib/storage'
 import { DollarSign, Users, Calendar as CalendarIcon, TrendingUp, PieChart as PieIcon, ArrowUpRight, ArrowDownRight, Activity, BrainCircuit } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Booking, FinanceRecord } from '@/types'
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts'
 import { Calendar } from '@/components/ui/calendar'
+import Link from 'next/link'
 
 const COLORS = ['#FF8042', '#0088FE', '#00C49F', '#FFBB28', '#8884d8'];
 
@@ -281,8 +283,15 @@ export default function DashboardPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="col-span-3 glass-dark border-white/5">
                     <CardHeader>
-                        <CardTitle>Crew Management</CardTitle>
-                        <CardDescription>Team availability and role overview</CardDescription>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Crew Management</CardTitle>
+                                <CardDescription>Team availability and role overview</CardDescription>
+                            </div>
+                            <Link href="/admin/crew">
+                                <Button variant="outline" size="sm" className="border-primary/20 text-primary hover:bg-primary/10">Manage</Button>
+                            </Link>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">

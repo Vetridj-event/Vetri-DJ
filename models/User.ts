@@ -12,6 +12,7 @@ const UserSchema = new Schema({
     whatsapp: { type: String },
     joinedDate: { type: String, default: () => new Date().toISOString() },
     avatar: { type: String },
+    salary: { type: Number, default: 0 },
 }, {
     timestamps: true,
     toJSON: {

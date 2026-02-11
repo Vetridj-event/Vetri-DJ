@@ -10,6 +10,7 @@ export interface User {
     whatsapp?: string
     joinedDate: string
     avatar?: string
+    salary?: number
 }
 
 export interface Booking {

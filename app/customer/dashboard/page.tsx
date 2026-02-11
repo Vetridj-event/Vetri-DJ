@@ -19,10 +19,13 @@ import {
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
+import { BookingModal } from '@/components/booking-modal'
+
 export default function CustomerDashboard() {
     const { user } = useAuth()
     const [bookings, setBookings] = useState<Booking[]>([])
     const [loading, setLoading] = useState(true)
+    const [isBookingOpen, setIsBookingOpen] = useState(false)
 
     useEffect(() => {
         if (user) {
@@ -65,12 +68,26 @@ export default function CustomerDashboard() {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div>
-                <h1 className="text-4xl font-black tracking-tight mb-2 flex items-center gap-3">
-                    Welcome back, {user?.name.split(' ')[0]}! <Sparkles className="w-8 h-8 text-primary animate-pulse" />
-                </h1>
-                <p className="text-muted-foreground text-lg">Manage your event bookings and track your payment details.</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-4xl font-black tracking-tight mb-2 flex items-center gap-3">
+                        Welcome back, {user?.name.split(' ')[0]}! <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+                    </h1>
+                    <p className="text-muted-foreground text-lg">Manage your event bookings and track your payment details.</p>
+                </div>
+                <Button
+                    onClick={() => setIsBookingOpen(true)}
+                    size="lg"
+                    className="bg-primary text-background font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+                >
+                    <Music className="w-4 h-4 mr-2" /> Book New Event
+                </Button>
             </div>
+
+            <BookingModal
+                open={isBookingOpen}
+                onOpenChange={setIsBookingOpen}
+            />
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -136,7 +153,7 @@ export default function CustomerDashboard() {
                                                     <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Status</p>
                                                     <div className="flex items-center gap-2">
                                                         <div className={`w-2 h-2 rounded-full ${booking.status === 'CONFIRMED' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' :
-                                                                booking.status === 'PENDING' ? 'bg-orange-500' : 'bg-gray-500'
+                                                            booking.status === 'PENDING' ? 'bg-orange-500' : 'bg-gray-500'
                                                             }`}></div>
                                                         <span className="font-bold">{booking.status}</span>
                                                     </div>
