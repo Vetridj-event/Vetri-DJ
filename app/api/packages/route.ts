@@ -27,8 +27,9 @@ export async function PUT(request: Request) {
     await dbConnect();
     try {
         const body = await request.json();
-        const { id, ...updateData } = body;
-        const pkg = await Package.findByIdAndUpdate(id, updateData, { new: true });
+        const { id, _id, ...updateData } = body;
+        const targetId = _id || id;
+        const pkg = await Package.findByIdAndUpdate(targetId, updateData, { new: true });
         if (!pkg) {
             return NextResponse.json({ error: 'Package not found' }, { status: 404 });
         }

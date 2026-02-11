@@ -25,19 +25,24 @@ export default function WebsitePage() {
     }
 
     const handleSave = async () => {
-        const updatedPackages = packages.map(p =>
-            p.id === editingId ? { ...p, ...formData } as EventPackage : p
-        )
-        await storage.setPackages(updatedPackages)
-        setPackages(updatedPackages)
-        setEditingId(null)
+        if (!editingId || !formData) return
+
+        const pkgToUpdate = { ...formData, id: editingId } as EventPackage
+        const success = await storage.updatePackage(pkgToUpdate)
+
+        if (success) {
+            setPackages(packages.map(p => p.id === editingId ? pkgToUpdate : p))
+            setEditingId(null)
+            setFormData({})
+        }
     }
 
     const handleDelete = async (id: string) => {
         if (confirm('Are you sure you want to delete this package?')) {
-            const updatedPackages = packages.filter(p => p.id !== id)
-            await storage.setPackages(updatedPackages)
-            setPackages(updatedPackages)
+            const success = await storage.deletePackage(id)
+            if (success) {
+                setPackages(packages.filter(p => p.id !== id))
+            }
         }
     }
 
@@ -48,10 +53,25 @@ export default function WebsitePage() {
             price: 0,
             features: ['Feature 1', 'Feature 2']
         }
-        const updated = [...packages, newPkg]
-        await storage.setPackages(updated)
-        setPackages(updated)
-        handleEdit(newPkg)
+        const success = await storage.addPackage(newPkg)
+        if (success) {
+            setPackages([...packages, newPkg])
+            handleEdit(newPkg)
+        }
+    }
+
+    const cleanupDuplicates = async () => {
+        if (!confirm('This will remove all redundant package entries and reset to defaults. Continue?')) return
+
+        // 1. Delete all current packages
+        for (const pkg of packages) {
+            await storage.deletePackage(pkg.id)
+        }
+
+        // 2. Refresh
+        const fresh = await storage.getPackages()
+        setPackages(fresh)
+        alert('Database cleaned! If it shows empty, the seed logic will restore defaults on next refresh.')
     }
 
     return (
@@ -61,9 +81,14 @@ export default function WebsitePage() {
                     <h2 className="text-3xl font-bold tracking-tight">Website Data</h2>
                     <p className="text-muted-foreground">Manage your event packages and website content.</p>
                 </div>
-                <Button onClick={addNewPackage} className="bg-primary hover:bg-primary/90 text-background">
-                    Add New Package
-                </Button>
+                <div className="flex gap-2">
+                    <Button onClick={cleanupDuplicates} variant="outline" className="border-red-500/50 text-red-500 hover:bg-red-500/10">
+                        Cleanup Duplicates
+                    </Button>
+                    <Button onClick={addNewPackage} className="bg-primary hover:bg-primary/90 text-background">
+                        Add New Package
+                    </Button>
+                </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

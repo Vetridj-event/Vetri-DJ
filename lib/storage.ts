@@ -134,13 +134,30 @@ export const storage = {
             return []
         }
     },
+    addPackage: async (pkg: EventPackage) => {
+        const res = await fetch('/api/packages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pkg)
+        })
+        return res.ok
+    },
+    updatePackage: async (pkg: EventPackage) => {
+        const res = await fetch('/api/packages', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pkg)
+        })
+        return res.ok
+    },
+    deletePackage: async (id: string) => {
+        const res = await fetch(`/api/packages?id=${id}`, { method: 'DELETE' })
+        return res.ok
+    },
+    // Keep for one-time initialization if needed, but avoid for updates
     setPackages: async (packages: EventPackage[]) => {
         for (const pkg of packages) {
-            await fetch('/api/packages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pkg)
-            })
+            await storage.addPackage(pkg)
         }
     },
 
