@@ -4,13 +4,14 @@ import User from '@/models/User';
 import { seedDatabase } from '@/lib/seed';
 
 export async function GET() {
-    await dbConnect();
-    await seedDatabase();
     try {
+        await dbConnect();
+        await seedDatabase();
         const users = await User.find({});
         return NextResponse.json(users);
-    } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+    } catch (error: any) {
+        console.error('API Error (GET /api/users):', error.message);
+        return NextResponse.json({ error: 'Failed to fetch users', details: error.message }, { status: 500 });
     }
 }
 
