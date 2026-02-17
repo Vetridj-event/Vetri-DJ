@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { storage } from '@/lib/storage'
 import { FinanceRecord, User, Booking } from '@/types'
