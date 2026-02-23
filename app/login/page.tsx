@@ -62,10 +62,6 @@ export default function LoginPage() {
             setStep('OTP')
             setTimeout(() => {
                 if (audioRef.current) audioRef.current.play().catch(() => { })
-                toast.success(`OTP: ${newOtp} (Simulated)`, {
-                    duration: 5000,
-                    description: 'In a production environment, this would be sent to your mobile.'
-                })
                 setValue('otp', newOtp)
             }, 800)
         } catch (err) {
@@ -141,7 +137,7 @@ export default function LoginPage() {
                         <Tabs defaultValue="customer" className="w-full" onValueChange={(v) => setLoginType(v as any)}>
                             <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/5 border border-white/10">
                                 <TabsTrigger value="customer">Customer</TabsTrigger>
-                                <TabsTrigger value="team">Team Members</TabsTrigger>
+                                <TabsTrigger value="team">Login</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="customer">
@@ -155,7 +151,6 @@ export default function LoginPage() {
                                                     id="phone"
                                                     {...register('phone')}
                                                     type="tel"
-                                                    placeholder="9876543210"
                                                     className="pl-10 bg-white/5 border-white/10 focus:border-primary/50 text-foreground placeholder:text-muted-foreground/50 transition-all font-mono tracking-wider"
                                                 />
                                             </div>
@@ -184,7 +179,6 @@ export default function LoginPage() {
                                                     id="otp"
                                                     {...register('otp')}
                                                     type="text"
-                                                    placeholder="••••••"
                                                     maxLength={6}
                                                     className="pl-10 bg-white/5 border-white/10 focus:border-primary/50 text-foreground text-center text-2xl tracking-[0.4em] font-black h-12"
                                                     autoFocus
@@ -200,7 +194,6 @@ export default function LoginPage() {
                                                     onClick={() => {
                                                         const newOtp = generateOTP()
                                                         if (audioRef.current) audioRef.current.play().catch(() => { })
-                                                        toast.success(`OTP Resent: ${newOtp}`)
                                                         setValue('otp', newOtp)
                                                     }}
                                                 >
@@ -245,7 +238,6 @@ export default function LoginPage() {
                                                     id="username"
                                                     {...register('username')}
                                                     type="text"
-                                                    placeholder="admin@vetridj.com"
                                                     className="pl-10 bg-white/5 border-white/10 focus:border-primary/50 text-foreground transition-all"
                                                 />
                                             </div>
@@ -259,7 +251,6 @@ export default function LoginPage() {
                                                     id="password"
                                                     {...register('password')}
                                                     type="password"
-                                                    placeholder="••••••••"
                                                     className="pl-10 bg-white/5 border-white/10 focus:border-primary/50 text-foreground placeholder:text-muted-foreground/50 transition-all"
                                                 />
                                             </div>
