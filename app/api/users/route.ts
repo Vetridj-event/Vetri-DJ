@@ -23,12 +23,7 @@ export async function POST(request: NextRequest) {
     if (errorResponse || !data) return errorResponse || NextResponse.json({ error: 'Data required' }, { status: 400 });
 
     try {
-        const existingUser = await User.findOne({
-            $or: [
-                { email: data.email },
-                { phone: data.phone }
-            ]
-        });
+        const existingUser = await User.findOne({ phone: data.phone });
 
         if (existingUser) {
             return NextResponse.json({ error: 'User already exists with this email or phone' }, { status: 400 });

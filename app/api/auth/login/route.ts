@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
             // Team Login (Password)
             const user = await User.findOne({
                 $or: [
-                    { email: identifier },
                     { phone: identifier },
                     { _id: identifier.match(/^[0-9a-fA-F]{24}$/) ? identifier : undefined }
                 ].filter(Boolean)

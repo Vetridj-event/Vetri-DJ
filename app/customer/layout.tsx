@@ -82,7 +82,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                             <UserCircle className="w-10 h-10 text-muted-foreground" />
                             <div className="overflow-hidden">
                                 <p className="text-sm font-medium truncate">{user.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                <p className="text-xs text-muted-foreground truncate">{user.phone}</p>
                             </div>
                         </div>
                         <Button

@@ -14,7 +14,6 @@ import { toast } from 'sonner'
 export default function RegisterPage() {
     const [step, setStep] = useState(1)
     const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [phone, setPhone] = useState('')
     const [whatsapp, setWhatsapp] = useState('')
@@ -39,7 +38,6 @@ export default function RegisterPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name,
-                    email: `${normalizedPhone}@customer.com`, // Internal fallback
                     password: 'otp_auth', // Default for OTP users
                     phone: normalizedPhone,
                     whatsapp: (whatsapp || phone).replace(/\D/g, '').length > 10 ? (whatsapp || phone).replace(/\D/g, '').slice(-10) : (whatsapp || phone).replace(/\D/g, ''),

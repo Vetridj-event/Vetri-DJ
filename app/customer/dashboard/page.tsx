@@ -40,7 +40,7 @@ export default function CustomerDashboard() {
         if (user) {
             setCurrentUser(user)
             storage.getBookings().then((all) => {
-                const myBookings = all.filter(b => b.customerId === user.id || b.customerEmail === user.email)
+                const myBookings = all.filter(b => b.customerId === user.id || b.customerPhone === user.phone)
                 setBookings(myBookings)
                 setLoading(false)
             })

@@ -16,7 +16,6 @@ export default function SettingsPage() {
 
     // Profile State
     const [name, setName] = useState(user?.name || '')
-    const [email, setEmail] = useState(user?.email || '')
     const [phone, setPhone] = useState(user?.phone || '')
     const [whatsapp, setWhatsapp] = useState(user?.whatsapp || '')
 
@@ -34,7 +33,6 @@ export default function SettingsPage() {
             const updatedUser = {
                 ...user,
                 name,
-                email,
                 phone,
                 whatsapp
             }
@@ -102,16 +100,13 @@ export default function SettingsPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
+                                <Label htmlFor="phone">Phone Number</Label>
                                 <Input
-                                    id="email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    id="phone"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
                                     className="bg-white/5 border-white/10"
-                                    disabled
                                 />
-                                <p className="text-xs text-muted-foreground">Contact support to change email.</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">

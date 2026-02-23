@@ -10,7 +10,7 @@ export const customerLoginSchema = z.object({
 })
 
 export const teamLoginSchema = z.object({
-    username: z.string().min(1, 'Username or Email is required'),
+    username: z.string().min(1, 'Username or Phone is required'),
     password: z.string().min(1, 'Password is required')
 })
 
@@ -22,7 +22,6 @@ export const loginSchema = z.discriminatedUnion('type', [
 
 export const registerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Invalid email address'),
     phone: z.string().regex(phoneRegex, 'Invalid 10-digit mobile number'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string()
@@ -36,7 +35,6 @@ export const registerSchema = z.object({
 export const bookingSchema = z.object({
     customerName: z.string().min(2, 'Customer name is required'),
     customerPhone: z.string().regex(phoneRegex, 'Invalid 10-digit mobile number').optional(),
-    customerEmail: z.string().email('Invalid email address').optional(),
     eventType: z.string().min(1, 'Event type is required'),
     date: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid date'),
     packageId: z.string().optional(),
