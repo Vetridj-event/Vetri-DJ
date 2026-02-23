@@ -184,25 +184,13 @@ export const storage = {
     // Auth Helper
     login: async (identifier: string, password: string): Promise<User | null> => {
         try {
-            const users = await storage.getUsers()
-            if (!Array.isArray(users)) return null
-
-            const isPhone = /^\+?[\d\s-]{10,}$/.test(identifier) && !identifier.includes('@')
-            const normalize = (p: string) => {
-                const d = p.replace(/\D/g, '')
-                return d.length > 10 ? d.slice(-10) : d
-            }
-            const normalizedInput = isPhone ? normalize(identifier) : identifier
-
-            return users.find(u => {
-                if (u.id === identifier || u.email === identifier) return u.password === password
-                const userPhone = normalize(u.phone || '')
-                const userWhatsapp = normalize(u.whatsapp || '')
-                if (isPhone && (userPhone === normalizedInput || userWhatsapp === normalizedInput)) {
-                    return u.password === password
-                }
-                return false
-            }) || null
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identifier, password, type: 'team' })
+            })
+            if (!res.ok) return null
+            return await res.json()
         } catch (error) {
             console.error('Login storage error:', error)
             return null

@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   keywords: ['DJ services Chengam', 'Wedding DJ', 'Event DJ', 'LED wall rental', 'Professional sound system'],
 }
 
+import { Toaster } from 'sonner'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,6 +27,7 @@ export default function RootLayout({
       <body className="font-sans antialiased text-foreground bg-background">
         <AuthProvider>
           {children}
+          <Toaster position="top-right" richColors theme="dark" />
         </AuthProvider>
       </body>
     </html>

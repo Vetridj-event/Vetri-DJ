@@ -2,13 +2,22 @@ import { User, Booking, InventoryItem, FinanceRecord, EventPackage } from '@/typ
 
 export const INITIAL_USERS: User[] = [
     {
-        id: 'admin-1',
+        id: '65dcf0000000000000000001',
         name: 'Vetri Admin',
         email: 'admin@vetridj.com',
         password: 'admin', // Mock password
         role: 'ADMIN',
         joinedDate: new Date().toISOString(),
         phone: '+91 98765 43210'
+    },
+    {
+        id: '65dcf0000000000000000002',
+        name: 'Vetri Crew',
+        email: 'crew@vetridj.com',
+        password: 'crew', // Mock password
+        role: 'CREW',
+        joinedDate: new Date().toISOString(),
+        phone: '+91 88888 88888'
     }
 ]
 

@@ -13,9 +13,10 @@ import { Loader2, MapPin, Phone, User as UserIcon, Sparkles } from 'lucide-react
 interface ProfileCompletionFormProps {
     user: User
     onComplete: (updatedUser: User) => void
+    onClose?: () => void
 }
 
-export function ProfileCompletionForm({ user, onComplete }: ProfileCompletionFormProps) {
+export function ProfileCompletionForm({ user, onComplete, onClose }: ProfileCompletionFormProps) {
     const [loading, setLoading] = useState(false)
     const [pincodeLoading, setPincodeLoading] = useState(false)
     const [formData, setFormData] = useState({
@@ -90,8 +91,8 @@ export function ProfileCompletionForm({ user, onComplete }: ProfileCompletionFor
     }
 
     return (
-        <Dialog open={true}>
-            <DialogContent className="sm:max-w-md glass-dark border-white/10" onPointerDownOutside={(e) => e.preventDefault()}>
+        <Dialog open={true} onOpenChange={(open) => { if (!open && onClose) onClose() }}>
+            <DialogContent className="sm:max-w-md glass-dark border-white/10" onPointerDownOutside={(e) => { if (!onClose) e.preventDefault() }}>
                 <DialogHeader className="text-center">
                     <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
                         <UserIcon className="w-8 h-8 text-primary" />
@@ -154,13 +155,13 @@ export function ProfileCompletionForm({ user, onComplete }: ProfileCompletionFor
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="city">City</Label>
+                            <Label htmlFor="city">City *</Label>
                             <Input
                                 id="city"
                                 placeholder="City"
                                 className="bg-white/5 border-white/10 focus:border-primary/50"
                                 value={formData.city}
-                                readOnly
+                                onChange={e => setFormData({ ...formData, city: e.target.value })}
                                 required
                             />
                         </div>
@@ -173,21 +174,33 @@ export function ProfileCompletionForm({ user, onComplete }: ProfileCompletionFor
                             placeholder="State"
                             className="bg-white/5 border-white/10 focus:border-primary/50"
                             value={formData.state}
-                            readOnly
+                            onChange={e => setFormData({ ...formData, state: e.target.value })}
                         />
                     </div>
 
-                    <Button
-                        type="submit"
-                        className="w-full bg-primary hover:bg-primary/90 text-background font-bold shadow-lg shadow-primary/20 h-12"
-                        disabled={loading || pincodeLoading}
-                    >
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                            <span className="flex items-center gap-2">
-                                <Sparkles className="w-4 h-4" /> Save & Explore
-                            </span>
+                    <div className="flex gap-3 pt-2">
+                        {onClose && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="flex-1 border-white/10 bg-white/5 hover:bg-white/10"
+                                onClick={onClose}
+                            >
+                                Later
+                            </Button>
                         )}
-                    </Button>
+                        <Button
+                            type="submit"
+                            className={onClose ? "flex-[2] bg-primary hover:bg-primary/90 text-background font-bold h-12" : "w-full bg-primary hover:bg-primary/90 text-background font-bold h-12"}
+                            disabled={loading || pincodeLoading}
+                        >
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                                <span className="flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4" /> Save & Explore
+                                </span>
+                            )}
+                        </Button>
+                    </div>
                 </form>
             </DialogContent>
         </Dialog>

@@ -18,8 +18,8 @@ export async function POST(request: Request) {
         // 2. Delete all finance records
         await Finance.deleteMany({});
 
-        // 3. Delete all users except ADMIN
-        await User.deleteMany({ role: { $ne: 'ADMIN' } });
+        // 3. Delete all users (Seeding will re-create necessary ones)
+        await User.deleteMany({});
 
         // 4. Delete all inventory items
         await Inventory.deleteMany({});

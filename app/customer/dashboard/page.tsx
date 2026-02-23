@@ -81,14 +81,19 @@ export default function CustomerDashboard() {
         },
     ]
 
-    if (loading) return <div>Loading dashboard...</div>
+    const [dismissProfileModal, setDismissProfileModal] = useState(false)
 
-    if (isProfileIncomplete && user) {
-        return <ProfileCompletionForm user={user} onComplete={handleProfileComplete} />
-    }
+    if (loading) return <div>Loading dashboard...</div>
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {isProfileIncomplete && user && !dismissProfileModal && (
+                <ProfileCompletionForm
+                    user={user}
+                    onComplete={handleProfileComplete}
+                    onClose={() => setDismissProfileModal(true)}
+                />
+            )}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-4xl font-black tracking-tight mb-2 flex items-center gap-3">

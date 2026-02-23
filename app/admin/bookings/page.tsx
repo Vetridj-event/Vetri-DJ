@@ -40,6 +40,12 @@ import { BookingReportModal } from '@/components/booking-report-modal'
 import { FinanceRecord } from '@/types'
 import { LayoutGrid, List, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { motion, AnimatePresence } from 'framer-motion'
+import { fadeIn, fadeInUp, staggerContainer } from '@/lib/animation-utils'
+import { playSound } from '@/lib/sound-utils'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { bookingSchema, BookingInput } from '@/lib/validations/schemas'
 
 export default function BookingsPage() {
     const [bookings, setBookings] = useState<Booking[]>([])
@@ -52,11 +58,22 @@ export default function BookingsPage() {
     const [viewMode, setViewMode] = useState<'TABLE' | 'CARDS'>('CARDS')
     const [selectedBookingForReport, setSelectedBookingForReport] = useState<Booking | null>(null)
 
-    // Form State
-    const [formData, setFormData] = useState<Partial<Booking>>({
-        status: 'PENDING',
-        date: new Date().toISOString().split('T')[0]
+    // React Hook Form for Bookings
+    const { register, handleSubmit, control, reset, setValue, watch, formState: { errors } } = useForm<BookingInput>({
+        resolver: zodResolver(bookingSchema),
+        defaultValues: {
+            status: 'PENDING',
+            date: new Date().toISOString().split('T')[0],
+            amount: 0,
+            advanceAmount: 0,
+            receivedAmount: 0,
+            location: ''
+        }
     })
+
+    const amount = watch('amount')
+    const advanceAmount = watch('advanceAmount')
+    const receivedAmount = watch('receivedAmount')
 
     useEffect(() => {
         loadData()
@@ -78,14 +95,14 @@ export default function BookingsPage() {
         return total - (advance + received)
     }
 
-    const handleSave = async () => {
-        const totalAmount = Number(formData.amount) || 0
-        const advance = Number(formData.advanceAmount) || 0
-        const received = Number(formData.receivedAmount) || 0
+    const handleSave = async (data: BookingInput) => {
+        const totalAmount = Number(data.amount) || 0
+        const advance = Number(data.advanceAmount) || 0
+        const received = Number(data.receivedAmount) || 0
         const balance = calculateBalance(totalAmount, advance, received)
 
         const bookingData = {
-            ...formData,
+            ...data,
             amount: totalAmount,
             advanceAmount: advance,
             receivedAmount: received,
@@ -102,9 +119,10 @@ export default function BookingsPage() {
             await storage.addBooking(newBooking)
         }
         await loadData()
+        playSound('success')
         setIsDialogOpen(false)
         setEditingBooking(null)
-        setFormData({ status: 'PENDING', date: new Date().toISOString().split('T')[0] })
+        reset({ status: 'PENDING', date: new Date().toISOString().split('T')[0], amount: 0, advanceAmount: 0, receivedAmount: 0, location: '' })
     }
 
     const sendWhatsApp = (booking: Booking, type: 'REQUEST' | 'RECEIPT') => {
@@ -155,7 +173,7 @@ export default function BookingsPage() {
 
     const openEdit = (booking: Booking) => {
         setEditingBooking(booking)
-        setFormData(booking)
+        reset(booking as any)
         setIsDialogOpen(true)
     }
 
@@ -167,7 +185,8 @@ export default function BookingsPage() {
 
     const filteredBookings = bookings.filter(b =>
         b.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.eventType.toLowerCase().includes(searchTerm.toLowerCase())
+        b.eventType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (b.location || '').toLowerCase().includes(searchTerm.toLowerCase())
     )
 
     const getStatusColor = (status: string) => {
@@ -181,15 +200,23 @@ export default function BookingsPage() {
     }
 
     return (
-        <div className="space-y-8" >
-            <div className="flex items-center justify-between">
+        <motion.div
+            initial="initial"
+            animate="animate"
+            variants={staggerContainer}
+            className="space-y-8"
+        >
+            <motion.div variants={fadeInUp} className="flex items-center justify-between">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">Bookings</h2>
                     <p className="text-muted-foreground">Manage event bookings and crew assignments.</p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button onClick={() => { setEditingBooking(null); setFormData({}) }} className="bg-primary hover:bg-primary/90 text-background">
+                        <Button onClick={() => {
+                            setEditingBooking(null);
+                            reset({ status: 'PENDING', date: new Date().toISOString().split('T')[0], amount: 0, advanceAmount: 0, receivedAmount: 0, location: '' });
+                        }} className="bg-primary hover:bg-primary/90 text-background">
                             <Plus className="mr-2 h-4 w-4" /> New Booking
                         </Button>
                     </DialogTrigger>
@@ -197,160 +224,159 @@ export default function BookingsPage() {
                         <DialogHeader>
                             <DialogTitle>{editingBooking ? 'Edit Booking' : 'New Booking'}</DialogTitle>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="name" className="text-right">Customer</Label>
+                        <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="customerName">Customer Name</Label>
                                 <Input
-                                    id="name"
-                                    value={formData.customerName || ''}
-                                    onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                                    className="col-span-3 bg-white/5 border-white/10"
+                                    id="customerName"
+                                    {...register('customerName')}
+                                    className="bg-white/5 border-white/10"
                                 />
+                                {errors.customerName && <p className="text-[10px] text-destructive">{errors.customerName.message}</p>}
                             </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="phone" className="text-right">Phone</Label>
-                                <Input
-                                    id="phone"
-                                    value={formData.customerPhone || ''}
-                                    onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
-                                    className="col-span-3 bg-white/5 border-white/10"
-                                />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="user" className="text-right">Link User</Label>
-                                <Select
-                                    value={formData.customerId || ''}
-                                    onValueChange={(val) => setFormData({ ...formData, customerId: val })}
-                                >
-                                    <SelectTrigger className="col-span-3 bg-white/5 border-white/10">
-                                        <SelectValue placeholder="Link to Customer Account" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">None (Guest)</SelectItem>
-                                        {customers.map(c => (
-                                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="event" className="text-right">Event Type</Label>
-                                <Input
-                                    id="event"
-                                    value={formData.eventType || ''}
-                                    onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
-                                    className="col-span-3 bg-white/5 border-white/10"
-                                />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="date" className="text-right">Date</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "col-span-3 justify-start text-left font-normal bg-white/5 border-white/10",
-                                                !formData.date && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {formData.date ? format(new Date(formData.date), "PPP") : <span>Pick a date</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={formData.date ? new Date(formData.date) : undefined}
-                                            onSelect={(date) => date && setFormData({ ...formData, date: date.toISOString().split('T')[0] })}
-                                            initialFocus
-                                            modifiers={{
-                                                booked: bookings.map(b => new Date(b.date))
-                                            }}
-                                            modifiersStyles={{
-                                                booked: { textDecoration: 'underline', color: 'var(--primary)', fontWeight: 'bold' }
-                                            }}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="amount" className="text-right">Total Fee</Label>
-                                <Input
-                                    id="amount"
-                                    type="number"
-                                    value={formData.amount || ''}
-                                    onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                                    className="col-span-3 bg-white/5 border-white/10"
-                                />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="advance" className="text-right">Advance</Label>
-                                <Input
-                                    id="advance"
-                                    type="number"
-                                    value={formData.advanceAmount || ''}
-                                    onChange={(e) => setFormData({ ...formData, advanceAmount: Number(e.target.value) })}
-                                    className="col-span-3 bg-white/5 border-white/10"
-                                />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="received" className="text-right">Received</Label>
-                                <Input
-                                    id="received"
-                                    type="number"
-                                    value={formData.receivedAmount || ''}
-                                    onChange={(e) => setFormData({ ...formData, receivedAmount: Number(e.target.value) })}
-                                    className="col-span-3 bg-white/5 border-white/10"
-                                />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label className="text-right">Balance</Label>
-                                <div className="col-span-3 px-3 py-2 bg-primary/10 rounded-lg text-primary font-bold">
-                                    ₹{calculateBalance(Number(formData.amount || 0), Number(formData.advanceAmount || 0), Number(formData.receivedAmount || 0)).toLocaleString()}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="customerPhone">Phone</Label>
+                                    <Input
+                                        id="customerPhone"
+                                        {...register('customerPhone')}
+                                        className="bg-white/5 border-white/10"
+                                    />
+                                    {errors.customerPhone && <p className="text-[10px] text-destructive">{errors.customerPhone.message}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="customerEmail">Email</Label>
+                                    <Input
+                                        id="customerEmail"
+                                        {...register('customerEmail')}
+                                        className="bg-white/5 border-white/10"
+                                    />
+                                    {errors.customerEmail && <p className="text-[10px] text-destructive">{errors.customerEmail.message}</p>}
                                 </div>
                             </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="status" className="text-right">Status</Label>
-                                <Select
-                                    value={formData.status}
-                                    onValueChange={(val: any) => setFormData({ ...formData, status: val })}
-                                >
-                                    <SelectTrigger className="col-span-3 bg-white/5 border-white/10">
-                                        <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="PENDING">Pending</SelectItem>
-                                        <SelectItem value="CONFIRMED">Confirmed</SelectItem>
-                                        <SelectItem value="COMPLETED">Completed</SelectItem>
-                                        <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="eventType">Event Type</Label>
+                                    <Input
+                                        id="eventType"
+                                        {...register('eventType')}
+                                        className="bg-white/5 border-white/10"
+                                    />
+                                    {errors.eventType && <p className="text-[10px] text-destructive">{errors.eventType.message}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="location">Location</Label>
+                                    <Input
+                                        id="location"
+                                        {...register('location')}
+                                        className="bg-white/5 border-white/10"
+                                    />
+                                    {errors.location && <p className="text-[10px] text-destructive">{errors.location.message}</p>}
+                                </div>
                             </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="crew" className="text-right">Crew</Label>
-                                <Select
-                                    value={formData.crewAssigned?.[0] || ''}
-                                    onValueChange={(val) => setFormData({ ...formData, crewAssigned: [val] })}
-                                >
-                                    <SelectTrigger className="col-span-3 bg-white/5 border-white/10">
-                                        <SelectValue placeholder="Assign Crew" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {crewMembers.map(crew => (
-                                            <SelectItem key={crew.id} value={crew.id}>{crew.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Event Date</Label>
+                                    <Controller
+                                        control={control}
+                                        name="date"
+                                        render={({ field }) => (
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant={"outline"}
+                                                        className={cn(
+                                                            "w-full justify-start text-left font-normal bg-white/5 border-white/10",
+                                                            !field.value && "text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                                        {field.value ? format(new Date(field.value), "PPP") : <span>Pick a date</span>}
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={new Date(field.value)}
+                                                        onSelect={(date) => date && field.onChange(date.toISOString().split('T')[0])}
+                                                        initialFocus
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                        )}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="status">Status</Label>
+                                    <Controller
+                                        control={control}
+                                        name="status"
+                                        render={({ field }) => (
+                                            <Select value={field.value} onValueChange={field.onChange}>
+                                                <SelectTrigger className="bg-white/5 border-white/10">
+                                                    <SelectValue placeholder="Status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="PENDING">Pending</SelectItem>
+                                                    <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+                                                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                                                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="amount">Total Fee</Label>
+                                    <Input
+                                        id="amount"
+                                        type="number"
+                                        {...register('amount', { valueAsNumber: true })}
+                                        className="bg-white/5 border-white/10"
+                                    />
+                                    {errors.amount && <p className="text-[10px] text-destructive">{errors.amount.message}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="advanceAmount">Advance</Label>
+                                    <Input
+                                        id="advanceAmount"
+                                        type="number"
+                                        {...register('advanceAmount', { valueAsNumber: true })}
+                                        className="bg-white/5 border-white/10"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="receivedAmount">Received</Label>
+                                    <Input
+                                        id="receivedAmount"
+                                        type="number"
+                                        {...register('receivedAmount', { valueAsNumber: true })}
+                                        className="bg-white/5 border-white/10"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="p-3 bg-primary/10 rounded-lg flex justify-between items-center">
+                                <span className="text-xs uppercase font-bold text-muted-foreground tracking-widest">Balance Due</span>
+                                <span className="text-xl font-black text-primary">
+                                    ₹{calculateBalance(Number(amount || 0), Number(advanceAmount || 0), Number(receivedAmount || 0)).toLocaleString()}
+                                </span>
                             </div>
                         </div>
-                        <DialogFooter>
-                            <Button onClick={handleSave} className="bg-primary text-background">Save Details</Button>
+                        <DialogFooter className="pt-2">
+                            <Button onClick={handleSubmit(handleSave)} className="w-full bg-primary text-background font-bold h-11">
+                                {editingBooking ? 'Update Booking' : 'Create Booking'}
+                            </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-            </div>
+            </motion.div>
 
-            <div className="flex items-center justify-between gap-4">
+            <motion.div variants={fadeIn} className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 flex-1">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -383,7 +409,7 @@ export default function BookingsPage() {
                         <Filter className="mr-2 h-4 w-4" /> Filter
                     </Button>
                 </div>
-            </div>
+            </motion.div>
 
             {viewMode === 'TABLE' ? (
                 <div className="rounded-lg border border-white/10 overflow-hidden glass-dark">
@@ -392,6 +418,7 @@ export default function BookingsPage() {
                             <TableRow className="border-white/10 hover:bg-white/5">
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Event</TableHead>
+                                <TableHead>Location</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Total</TableHead>
                                 <TableHead>Balance</TableHead>
@@ -420,6 +447,9 @@ export default function BookingsPage() {
                                                 {booking.eventType}
                                                 {booking.customerId && <UserIcon className="w-3 h-3 text-primary" />}
                                             </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="text-xs text-muted-foreground">{booking.location}</span>
                                         </TableCell>
                                         <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
                                         <TableCell>₹{booking.amount.toLocaleString()}</TableCell>
@@ -518,7 +548,10 @@ export default function BookingsPage() {
                             <CardContent className="space-y-4">
                                 <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
                                     <span className="text-muted-foreground flex items-center gap-2"><CalendarIcon className="w-3.5 h-3.5" /> {new Date(booking.date).toLocaleDateString()}</span>
-                                    <span className="font-bold text-primary">{booking.eventType}</span>
+                                    <div className="text-right">
+                                        <p className="font-bold text-primary">{booking.eventType}</p>
+                                        <p className="text-[10px] text-muted-foreground">{booking.location}</p>
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
@@ -575,6 +608,6 @@ export default function BookingsPage() {
                     />
                 )
             }
-        </div >
+        </motion.div>
     )
 }

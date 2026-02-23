@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/context/auth-context'
+import { storage } from '@/lib/storage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -26,15 +27,26 @@ export default function SettingsPage() {
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (!user) return
         setLoading(true)
 
         try {
-            // Update logic here (API call)
-            // For now, simulating success
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            toast.success('Profile updated successfully!')
+            const updatedUser = {
+                ...user,
+                name,
+                email,
+                phone,
+                whatsapp
+            }
+            const success = await storage.updateUser(updatedUser)
+            if (success) {
+                toast.success('Profile updated successfully!')
+            } else {
+                toast.error('Failed to update profile.')
+            }
         } catch (error) {
-            toast.error('Failed to update profile.')
+            console.error('Update profile error:', error)
+            toast.error('An error occurred while updating your profile.')
         } finally {
             setLoading(false)
         }

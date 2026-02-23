@@ -23,6 +23,16 @@ const UserSchema = new Schema({
             ret.id = ret._id.toString();
             delete ret._id;
             delete ret.__v;
+            delete ret.password;
+            return ret;
+        }
+    },
+    toObject: {
+        transform: (doc, ret: any) => {
+            ret.id = ret._id.toString();
+            delete ret._id;
+            delete ret.__v;
+            delete ret.password;
             return ret;
         }
     }

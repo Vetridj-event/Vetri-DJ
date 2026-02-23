@@ -133,21 +133,37 @@ export default function Page() {
             <div className="relative group p-4">
               <div className="absolute -inset-4 bg-primary/10 rounded-[3rem] blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
               <div className="relative rounded-[2.5rem] overflow-hidden border border-white/10 aspect-[4/5] shadow-2xl">
-                <img
-                  src="/images/Event.jpg"
-                  alt="Premium Event Setup"
-                  className="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
-                />
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  loop
+                  muted={isMuted}
+                  playsInline
+                  className="w-full h-full object-cover"
+                >
+                  <source src="/Landing Video.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60" />
 
-                <div className="absolute bottom-8 left-8 right-8 p-6 glass backdrop-blur-md rounded-2xl border-white/10 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700">
+                {/* Mute/Unmute Button */}
+                <button
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="absolute bottom-8 right-8 w-12 h-12 rounded-full glass backdrop-blur-md border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary transition-all duration-500 group/btn z-20"
+                  aria-label={isMuted ? "Unmute video" : "Mute video"}
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-5 h-5 text-white group-hover/btn:text-background transition-colors" />
+                  ) : (
+                    <Volume2 className="w-5 h-5 text-primary group-hover/btn:text-background transition-colors" />
+                  )}
+                </button>
+
+                <div className="absolute bottom-8 left-8 right-24 p-6 glass backdrop-blur-md rounded-2xl border-white/10 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-primary font-bold text-xs tracking-widest uppercase mb-1">Latest Event</p>
                       <p className="text-white font-bold">Grand Wedding - Chengam Regency</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Music className="w-6 h-6 text-primary" />
                     </div>
                   </div>
                 </div>
@@ -157,51 +173,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Video Showcase Section */}
-      <section className="py-32 relative bg-white/[0.02]">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20 space-y-6">
-            <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.2em]">Experience</Badge>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter">
-              SEE US IN <span className="text-gradient-gold">ACTION</span>
-            </h2>
-            <div className="w-24 h-1 bg-primary mx-auto" />
-          </div>
-
-          <div className="max-w-6xl mx-auto relative group">
-            <div className="absolute -inset-4 bg-primary/10 rounded-[3rem] blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
-            <div className="relative rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl">
-              <video
-                ref={videoRef}
-                autoPlay
-                loop
-                muted={isMuted}
-                playsInline
-                className="w-full h-auto"
-              >
-                <source src="/Landing Video.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-
-              {/* Mute/Unmute Button */}
-              <button
-                onClick={() => setIsMuted(!isMuted)}
-                className="absolute bottom-8 right-8 w-14 h-14 rounded-full glass backdrop-blur-md border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary transition-all duration-500 group/btn"
-                aria-label={isMuted ? "Unmute video" : "Mute video"}
-              >
-                {isMuted ? (
-                  <VolumeX className="w-6 h-6 text-white group-hover/btn:text-background transition-colors" />
-                ) : (
-                  <Volume2 className="w-6 h-6 text-primary group-hover/btn:text-background transition-colors" />
-                )}
-              </button>
-
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent pointer-events-none" />
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Services Grid */}
       <section className="py-32 relative">

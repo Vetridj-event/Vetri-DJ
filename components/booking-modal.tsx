@@ -123,6 +123,7 @@ ${formData.additionalNotes || 'None'}`
       amount: totalAmount,
       status: 'PENDING',
       djPackage: formData.djPackage,
+      location: formData.location,
       additionalNotes: formData.additionalNotes,
       customerId: user?.id,
       customerEmail: user?.email

@@ -72,53 +72,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const loginWithOTP = async (phone: string, otp: string) => {
-        // Simulate OTP verification
+        // Simulate OTP verification delay
         await new Promise(resolve => setTimeout(resolve, 800))
 
         const normalizedInput = normalizePhone(phone)
 
         // Verify against activeOTP (or fallback to '123456' for safety during transition/demo)
         if (otp === activeOTP || otp === '123456') {
-            const users = await storage.getUsers()
-            let validUser = users.find(u => {
-                const normalizedUserPhone = normalizePhone(u.phone || '')
-                return normalizedUserPhone === normalizedInput && u.role === 'CUSTOMER'
-            })
-
-            // If user doesn't exist, Create a guest/new customer record
-            if (!validUser) {
-                const newUser: User = {
-                    id: `cust-${Date.now()}`,
-                    name: 'Guest Customer',
-                    phone: phone, // Store original for reference
-                    role: 'CUSTOMER',
-                    password: 'otp_auth',
-                    joinedDate: new Date().toISOString()
-                }
-                const res = await fetch('/api/users', {
+            try {
+                const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newUser)
+                    body: JSON.stringify({ phone, otp, type: 'customer' })
                 })
-                if (res.ok) validUser = newUser
-            }
 
-            if (validUser) {
-                setUser(validUser)
-                setActiveOTP(null) // Clear OTP after login
-                localStorage.setItem('vetri_session', JSON.stringify(validUser))
-                const sessionData = encodeURIComponent(JSON.stringify(validUser))
-                document.cookie = `vetri_session=${sessionData}; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`
+                if (res.ok) {
+                    const validUser = await res.json()
+                    setUser(validUser)
+                    setActiveOTP(null)
+                    localStorage.setItem('vetri_session', JSON.stringify(validUser))
 
-                // Redirect based on role
-                if (validUser.role === 'ADMIN') {
-                    router.push('/admin/dashboard')
-                } else if (validUser.role === 'CUSTOMER') {
-                    router.push('/customer/dashboard')
-                } else {
-                    router.push('/crew/dashboard')
+                    // Redirect based on role
+                    if (validUser.role === 'ADMIN') {
+                        router.push('/admin/dashboard')
+                    } else if (validUser.role === 'CUSTOMER') {
+                        router.push('/customer/dashboard')
+                    } else {
+                        router.push('/crew/dashboard')
+                    }
+                    return true
                 }
-                return true
+            } catch (error) {
+                console.error('OTP Login error:', error)
             }
         }
         return false
