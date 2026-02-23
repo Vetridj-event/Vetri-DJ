@@ -41,8 +41,8 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
     const navItems = [
         { name: 'Overview', icon: LayoutDashboard, href: '/customer/dashboard' },
         { name: 'My Bookings', icon: Calendar, href: '/customer/bookings' },
+        { name: 'My Profile', icon: UserCircle, href: '/customer/profile' },
         { name: 'Contact Support', icon: PhoneCall, href: '/customer/support' },
-        { name: 'Settings', icon: Settings, href: '/customer/settings' },
     ]
 
     return (
@@ -65,8 +65,8 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                                 <Button
                                     variant="ghost"
                                     className={`w-full justify-start gap-3 h-11 px-4 transition-all ${pathname === item.href
-                                            ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20'
-                                            : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                                        ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                                         }`}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >

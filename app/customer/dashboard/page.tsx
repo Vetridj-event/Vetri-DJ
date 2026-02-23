@@ -14,7 +14,8 @@ import {
     Music,
     ArrowRight,
     Sparkles,
-    AlertCircle
+    AlertCircle,
+    UserCircle
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -101,13 +102,24 @@ export default function CustomerDashboard() {
                     </h1>
                     <p className="text-muted-foreground text-lg">Manage your event bookings and track your payment details.</p>
                 </div>
-                <Button
-                    onClick={() => setIsBookingOpen(true)}
-                    size="lg"
-                    className="bg-primary text-background font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
-                >
-                    <Music className="w-4 h-4 mr-2" /> Book New Event
-                </Button>
+                <div className="flex flex-wrap gap-4">
+                    <Link href="/customer/profile">
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            className="border-white/10 bg-white/5 hover:bg-white/10 font-bold"
+                        >
+                            <UserCircle className="w-4 h-4 mr-2" /> Edit Profile
+                        </Button>
+                    </Link>
+                    <Button
+                        onClick={() => setIsBookingOpen(true)}
+                        size="lg"
+                        className="bg-primary text-background font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+                    >
+                        <Music className="w-4 h-4 mr-2" /> Book New Event
+                    </Button>
+                </div>
             </div>
 
             <BookingModal
